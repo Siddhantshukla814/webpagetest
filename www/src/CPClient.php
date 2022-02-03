@@ -6,6 +6,9 @@ namespace WebPageTest;
 
 use Exception as BaseException;
 use GraphQL\Query;
+use GraphQL\Exception\QueryError;
+use GraphQL\Mutation;
+use GraphQL\Variable;
 use GraphQL\Client as GraphQLClient;
 use GuzzleHttp\Client as GuzzleClient;
 use WebPageTest\AuthToken;
@@ -122,6 +125,107 @@ class CPClient
             return $account_details->getData()['userIdentity']['activeContact'];
         } catch (BaseException $e) {
             throw new ClientException($e->getMessage());
+        }
+    }
+
+    public function getUserContactInfo(int $id): array
+    {
+        $gql = (new Query('contact'))
+        ->setVariables([
+        new Variable('id', 'ID', true)
+        ])
+        ->setArguments(['id' => '$id'])
+        ->setSelectionSet([
+        'companyName',
+        'firstName',
+        'lastName'
+        ]);
+
+        $variables_array = array('id' => $id);
+        $contact_info = $this->graphql_client->runQuery($gql, true, $variables_array);
+        return $contact_info->getData()['contact'][0];
+    }
+
+    public function getUnpaidAccountpageInfo(): array
+    {
+        $gql = (new Query())
+        ->setSelectionSet([
+        'braintreeClientToken',
+        (new Query('wptPlans'))
+          ->setSelectionSet([
+            'id',
+            'name',
+            'price',
+            'billingFrequency',
+            'billingDayOfMonth',
+            'currencyIsoCode',
+            'numberOfBillingCycles',
+            'trialDuration',
+            'trialPeriod',
+            (new Query('discount'))
+              ->setSelectionSet([
+                'amount',
+                'numberOfBillingCycles'
+              ])
+          ])
+        ]);
+        $page_info = $this->graphql_client->runQuery($gql, true);
+        return $page_info->getData();
+    }
+
+    public function updateUserContactInfo(string $id, array $options): array
+    {
+        $gql = (new Mutation('wptContactUpdate'))
+        ->setVariables([
+        new Variable('contact', 'ContactUpdateInputType', true)
+        ])
+        ->setArguments([
+        'contact' => '$contact'
+        ])
+        ->setSelectionSet([
+        'id',
+        'firstName',
+        'lastName',
+        'companyName',
+        'email'
+        ]);
+
+        $variables_array = array('contact' => [
+        'id' => $id,
+        'email' => $options['email'],
+        'firstName' => $options['first_name'],
+        'lastName' => $options['last_name'],
+        'companyName' => $options['company_name']
+        ]);
+
+        $results = $this->graphql_client->runQuery($gql, true, $variables_array);
+        return $results->getData();
+    }
+
+    public function changePassword (string $new_pass, string $current_pass) : array
+    {
+        $gql = (new Mutation('userPasswordChange'))
+        ->setVariables([
+        new Variable('passwordChangedInput', 'UserPasswordChangeInputType', true)
+        ])
+        ->setArguments([
+        'changePassword' => '$passwordChangedInput'
+        ])
+        ->setSelectionSet([
+          'id',
+          'lastPasswordChangedDate'
+        ]);
+
+        $variables_array = array('passwordChangedInput' => [
+            'newPassword' => $new_pass,
+            'currentPassword' => $current_pass
+        ]);
+
+        try {
+          $results = $this->graphql_client->runQuery($gql, true, $variables_array);
+          return $results->getData();
+        } catch (QueryError $e) {
+          throw new ClientException(implode(",", $e->getErrorDetails()));
         }
     }
 }
