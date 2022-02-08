@@ -14,6 +14,28 @@ use WebPageTest\Exception\ClientException;
 use WebPageTest\RequestContext;
 
 (function(RequestContext $request_context){
+
+if (!Util::getSetting('cp_auth')) {
+    $protocol = $request_context->getUrlProtocol();
+    $host = Util::getSetting('host');
+    $route = '/';
+    $redirect_uri = "{$protocol}://{$host}{$route}";
+
+    header("Location: {$redirect_uri}");
+    exit();
+}
+
+$access_token = $request_context->getUser()->getAccessToken();
+if (is_null($access_token)) {
+    $protocol = $request_context->getUrlProtocol();
+    $host = Util::getSetting('host');
+    $route = '/login';
+    $redirect_uri = "{$protocol}://{$host}{$route}?redirect_uri={$protocol}://{$host}/account";
+
+    header("Location: {$redirect_uri}");
+    exit();
+}
+
 $request_method = strtoupper($_SERVER['REQUEST_METHOD']);
 
 if ($request_method === 'POST') {
