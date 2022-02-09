@@ -25,8 +25,9 @@ if ($request_method === 'POST') {
 
     $access_token = $request_context->getUser()->getAccessToken();
     try {
-      $request_context->getClient()->revokeToken($access_token);
-    } catch (Exception $e) {}
+        $request_context->getClient()->revokeToken($access_token);
+    } catch (Exception $e) {
+    }
 
     setcookie("cp_access_token", "", time() - 3600, "/", $host);
     setcookie("cp_refresh_token", "", time() - 3600, "/", $host);

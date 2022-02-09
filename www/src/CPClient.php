@@ -202,7 +202,7 @@ class CPClient
         return $results->getData();
     }
 
-    public function changePassword (string $new_pass, string $current_pass) : array
+    public function changePassword(string $new_pass, string $current_pass): array
     {
         $gql = (new Mutation('userPasswordChange'))
         ->setVariables([
@@ -222,10 +222,10 @@ class CPClient
         ]);
 
         try {
-          $results = $this->graphql_client->runQuery($gql, true, $variables_array);
-          return $results->getData();
+            $results = $this->graphql_client->runQuery($gql, true, $variables_array);
+            return $results->getData();
         } catch (QueryError $e) {
-          throw new ClientException(implode(",", $e->getErrorDetails()));
+            throw new ClientException(implode(",", $e->getErrorDetails()));
         }
     }
 }

@@ -14,7 +14,8 @@ class ClientException extends \Exception
         $this->route = $route;
     }
 
-    public function getRoute() : string {
-      return $this->route;
+    public function getRoute(): string
+    {
+        return $this->route;
     }
 }
