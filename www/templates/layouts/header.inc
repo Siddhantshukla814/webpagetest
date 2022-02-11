@@ -49,7 +49,7 @@ if ($id && isset($test) && is_array($test) &&
 }
 
 // If $tab is null, make it an empty string for strcasecmp
-$tab = $tab ?? "";
+$tab ??= "";
 
 if (!defined('EMBED')) {
 ?>

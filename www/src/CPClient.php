@@ -173,6 +173,61 @@ class CPClient
         return $page_info->getData();
     }
 
+    public function getPaidAccountPageInfo () : array
+    {
+      $gql = (new Query())
+        ->setSelectionSet([
+          (new Query('wptApiKey'))
+            ->setSelectionSet([
+              'id',
+              'name',
+              'apiKey',
+              'createDate',
+              'changeDate'
+            ]),
+          (new Query('braintreeCustomerDetails'))
+              ->setSelectionSet([
+                  'customerId',
+                  'wptPlanId',
+                  'subscriptionId',
+                  'ccLastFour',
+                  'daysPastDue',
+                  'subscriptionPrice',
+                  'maskedCreditCard',
+                  'nextBillingDate',
+                  'billingPeriodEndDate',
+                  'numberOfBillingCycles',
+                  'ccExpirationDate',
+                  'ccImageUrl',
+                  'status',
+                  (new Query('discount'))
+                    ->setSelectionSet([
+                      'amount',
+                      'numberOfBillingCycles'
+                    ]),
+                  'remainingRuns',
+                  'planRenewalDate',
+                  'billingFrequency',
+                  'wptPlanName'
+              ]),
+          (new Query('braintreeTransactionHistory'))
+              ->setSelectionSet([
+                  'amount',
+                  'cardType',
+                  'ccLastFour',
+                  'maskedCreditCard',
+                  'transactionDate'
+              ])
+        ]);
+
+        try {
+            $results = $this->graphql_client->runQuery($gql, true);
+            return $results->getData();
+        } catch (QueryError $e) {
+            throw new ClientException(implode(",", $e->getErrorDetails()));
+        }
+    }
+
     public function updateUserContactInfo(string $id, array $options): array
     {
         $gql = (new Mutation('wptContactUpdate'))
@@ -219,6 +274,35 @@ class CPClient
         $variables_array = array('passwordChangedInput' => [
             'newPassword' => $new_pass,
             'currentPassword' => $current_pass
+        ]);
+
+        try {
+            $results = $this->graphql_client->runQuery($gql, true, $variables_array);
+            return $results->getData();
+        } catch (QueryError $e) {
+            throw new ClientException(implode(",", $e->getErrorDetails()));
+        }
+    }
+
+    public function createApiKey (string $name) : array
+    {
+      $gql = (new Mutation('wptApiKeyCreate'))
+        ->setVariables([
+          new Variable('wptApiKey', 'WptApiKeyCreateInputType', true)
+        ])
+        ->setArguments([
+          'wptApiKey' => '$wptApiKey'
+        ])
+        ->setSelectionSet([
+          'id',
+          'name',
+          'apiKey',
+          'createDate',
+          'changeDate'
+        ]);
+
+        $variables_array = array('wptApiKey' => [
+            'name' => $name,
         ]);
 
         try {

@@ -1,3 +1,4 @@
+<!-- TODO: move this script -->
 <script>
 ((window) => {
 class Modal extends HTMLElement {
@@ -214,6 +215,8 @@ window.Modal = Modal;
 })(window);
 
 </script>
+
+<!-- TODO: move this style block -->
 <style>
 .fg-modal * {
   box-sizing: border-box;
@@ -447,21 +450,33 @@ body.theme-b {
 }
 </style>
 <div class="my-account-page">
+
+  <?php if (!$is_verified): ?>
+  <div>
+    <div>
+      <div></div>
+      <div>A verification link was sent to your email</div>
+    </div>
+    <div>Please click on the link that was sent to your email to complete your registration process.</div>
+    <div>Didn’t receive an email?<form><button type="button">Resend Verification Link</button></form></div>
+  </div>
+  <?php endif; ?>
+
   <div class="subhed">
     <h1>My Account</h1>
-    <?php if ($is_paid) { ?>
+    <?php if ($is_paid): ?>
     <div class="contact-support-button">
       <a href="https://support.webpagetest.org"><span>Contact Support</span></a>
     </div>
-    <?php } ?>
+    <?php endif; ?>
   </div>
 
   <div>
     <div class="card contact-info" data-modal="contact-info-modal">
       <div class="card-section">
-        <h3><?php echo htmlspecialchars($first_name) . ' ' . htmlspecialchars($last_name); ?></h3>
+        <h3><?= htmlspecialchars($first_name) . ' ' . htmlspecialchars($last_name) ?></h3>
         <div class="info">
-          <div><?php echo htmlspecialchars($email); ?></div>
+          <div><?= htmlspecialchars($email) ?></div>
         </div>
       </div>
       <div class="card-section">
@@ -486,36 +501,22 @@ body.theme-b {
     </div>
 
 <?php if ($is_paid) {
-  include_once __DIR__ . '/includes/signup.php';
-} else {
   include_once __DIR__ . '/includes/billing-data.php';
+} else {
+  include_once __DIR__ . '/includes/signup.php';
 } ?>
 </div>
 
 
+<!-- Modals -->
 <?php
 include_once __DIR__ . '/includes/modals/contact-info.php';
 include_once __DIR__ . '/includes/modals/password.php';
-
+include_once __DIR__ . '/includes/modals/subscription-plan.php';
 ?>
+<!-- /Modals -->
 
 
-
-<fg-modal id="subscription-plan-modal" class="subscription-plan-modal fg-modal">
-  <form method="POST" action="/account">
-    <fieldset>
-      <legend class="modal_title">Subscription Details</legend>
-    </fieldset>
-  </form>
-</fg-modal>
-
-<fg-modal id="subscription-plan-modal" class="subscription-plan-modal fg-modal">
-  <form method="POST" action="/account">
-    <fieldset>
-      <legend class="modal_title">Subscription Details</legend>
-    </fieldset>
-  </form>
-</fg-modal>
 
 <fg-modal id="payment-info-modal" class="payment-info-modal fg-modal">
   <form method="POST" action="/account">

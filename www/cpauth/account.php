@@ -128,11 +128,13 @@ use WebPageTest\RequestContext;
         $error_message = $_SESSION['client-error'] ?? null;
 
         $is_paid = $request_context->getUser()->isPaid();
+        $is_verified = $request_context->getUser()->isVerified();
         $user_contact_info = $request_context->getClient()->getUserContactInfo($request_context->getUser()->getUserId());
 
         $contact_info = array(
         'layout_theme' => 'b',
         'is_paid' => $is_paid,
+        'is_verified' => $is_verified,
         'first_name' => htmlspecialchars($user_contact_info['firstName']),
         'last_name' => htmlspecialchars($user_contact_info['lastName']),
         'email' => $request_context->getUser()->getEmail(),
@@ -140,35 +142,10 @@ use WebPageTest\RequestContext;
         'id' => $request_context->getUser()->getUserId()
         );
 
-        // TODO - make the call for paid user data
         $billing_info = array();
 
-        if (!$is_paid) {
-            $billing_info = array(
-            'plan' => '1,000 runs',
-            'remaining' => '998',
-            'run_renewal' => '12/16/2021',
-            'price' => '$180',
-            'payment_frequency' => 'Annually',
-            'plan_renewal' => '11/17/2022',
-            'status' => 'active',
-            'cc_number' => '370844******3579',
-            'cc_expiration_date' => '11/2042',
-            'billing_history' => array(
-            array(
-            'date_time_stamp' => 'Nov 17 2021 15:39:23',
-            'credit_card' => 'AMEX',
-            'cc_number' => '370844******3579',
-            'amount' => '$180'
-            ),
-            array(
-            'date_time_stamp' => 'Nov 17 2020 15:39:23',
-            'credit_card' => 'AMEX',
-            'cc_number' => '370844******3579',
-            'amount' => '$180'
-            )
-            )
-            );
+        if ($is_paid) {
+            $billing_info = $request_context->getClient()->getPaidAccountPageInfo();
         } else {
             $info = $request_context->getClient()->getUnpaidAccountpageInfo();
             $plans = $info['wptPlans'];
