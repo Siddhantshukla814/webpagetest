@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../common.inc';
 global $USER_EMAIL;
 global $supportsAuth;
 global $supportsSaml;
+global $noanalytics;
 
 $page_title = $page_title ? $page_title : 'WebPageTest';
 ?>
